@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Lumen: adaptive learning that checks understanding</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@500;700&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#eef2f6;--sf:#fff;--ink:#14213d;--mut:#55627a;--ln:#cdd6e2;--ac:#f2b705;--acink:#14213d;--ok:#1b7f5c;--bad:#b3362f;--pri:#2b4a9b;--prit:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1626;--sf:#16223a;--ink:#e8edf6;--mut:#9fb0cc;--ln:#2c3b5a;--ok:#4ac596;--bad:#ff7b72;--pri:#8fb0ff;--prit:#0e1626}}
+:root[data-theme="dark"]{--bg:#0e1626;--sf:#16223a;--ink:#e8edf6;--mut:#9fb0cc;--ln:#2c3b5a;--ok:#4ac596;--bad:#ff7b72;--pri:#8fb0ff;--prit:#0e1626}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.55 "Atkinson Hyperlegible",system-ui,sans-serif}
+h1,h2,h3{font-family:"Bricolage Grotesque",system-ui,sans-serif;line-height:1.1;margin:0}
+.w{max-width:880px;margin:0 auto;padding:0 20px}
+header{display:flex;justify-content:space-between;align-items:center;padding:18px 0}
+.logo{font:700 24px "Bricolage Grotesque",sans-serif}.logo i{display:inline-block;width:14px;height:14px;border-radius:50%;background:var(--ac);margin-right:8px}
+nav button{background:none;border:0;color:var(--mut);font:inherit;padding:8px 12px;cursor:pointer;border-bottom:3px solid transparent}
+nav button[aria-current=true]{color:var(--ink);border-color:var(--ac)}
+h1{font-size:clamp(2.3rem,7vw,4rem);max-width:13ch;margin:28px 0 16px}
+.lead{color:var(--mut);max-width:56ch;margin:0 0 28px}
+.topics{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.tp{text-align:left;background:var(--sf);border:2px solid var(--ln);border-radius:10px;padding:18px;font:inherit;color:var(--ink);cursor:pointer}
+.tp:hover{border-color:var(--pri)}.tp h3{font-size:1.25rem;margin-bottom:6px}.tp p{margin:0 0 12px;color:var(--mut);font-size:.95rem}
+.bar{height:8px;background:var(--ln);border-radius:4px;overflow:hidden}.bar b{display:block;height:100%;background:var(--ok);transition:width .5s}
+.card{background:var(--sf);border:2px solid var(--ln);border-radius:10px;padding:24px;margin:20px 0}
+.meta{display:flex;justify-content:space-between;color:var(--mut);font-size:.9rem;margin-bottom:12px;flex-wrap:wrap;gap:6px}
+.q{font:500 1.5rem/1.3 "Bricolage Grotesque",sans-serif;margin:0 0 18px}
+.opt{display:block;width:100%;text-align:left;background:var(--bg);border:2px solid var(--ln);border-radius:8px;padding:12px 14px;margin:8px 0;font:inherit;color:var(--ink);cursor:pointer}
+.opt[aria-pressed=true]{border-color:var(--pri);background:color-mix(in srgb,var(--pri) 14%,var(--sf))}
+.opt.ok{border-color:var(--ok)}.opt.no{border-color:var(--bad)}.opt:disabled{cursor:default}
+.btn{background:var(--pri);color:var(--prit);border:0;border-radius:8px;padding:11px 18px;font:700 1rem "Atkinson Hyperlegible",sans-serif;cursor:pointer}
+.btn.g{background:none;color:var(--ink);border:2px solid var(--ln)}.btn:disabled{opacity:.4;cursor:not-allowed}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px}
+.hint{background:color-mix(in srgb,var(--ac) 25%,var(--sf));border-left:5px solid var(--ac);padding:10px 14px;border-radius:4px;margin:12px 0}
+.fb{border-left:5px solid var(--ok);padding:4px 14px;margin:16px 0}.fb.no{border-color:var(--bad)}
+textarea{width:100%;min-height:76px;background:var(--bg);color:var(--ink);border:2px solid var(--ln);border-radius:8px;padding:10px;font:inherit}
+button:focus-visible,textarea:focus-visible{outline:3px solid var(--ac);outline-offset:2px}
+.stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+.big{font:700 2.6rem "Bricolage Grotesque",sans-serif}
+.how{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));margin:48px 0}
+.how p{color:var(--mut);margin:6px 0 0}.how h3{font-size:1.15rem}
+.j{border-top:1px solid var(--ln);padding:10px 0}.j small{color:var(--mut)}
+footer{color:var(--mut);font-size:.85rem;padding:30px 0 40px}
+[hidden]{display:none!important}
+</style></head><body>
+<div class="w">
+<header><div class="logo"><i></i>Lumen</div>
+<nav><button id="n1" aria-current="true">Learn</button><button id="n2" aria-current="false">My progress</button></nav></header>
+
+<main id="home">
+<h1>Learn it until you could teach it.</h1>
+<p class="lead">Lumen adjusts question difficulty to your pace, asks you to explain your thinking, and compares how sure you felt with how right you were. Pick a topic to start.</p>
+<div class="topics" id="topics"></div>
+<section class="how">
+<div><h3>It follows your pace</h3><p>Answer well and questions get harder. Struggle and Lumen steps back and rebuilds the foundation.</p></div>
+<div><h3>It makes you think</h3><p>Each question asks how confident you are, then asks you to explain the reasoning in your own words.</p></div>
+<div><h3>It brings back what you missed</h3><p>Missed questions return a few steps later, so the idea sticks instead of fading.</p></div>
+</section></main>
+
+<main id="quiz" hidden></main>
+
+<main id="prog" hidden>
+<h2 style="margin:24px 0 8px;font-size:2.2rem">My progress</h2>
+<div class="stats" id="stats"></div>
+<div class="card"><h3>Topic mastery</h3><div id="mast"></div></div>
+<div class="card"><h3>My reflection journal</h3><div id="jr"></div></div>
+<button class="btn g" id="reset">Reset all progress</button>
+</main>
+<footer>Progress is saved in this browser only.</footer>
+</div>
+<script>
+const T={
+math:{n:"Fractions and ratios",d:"Compare, scale and reason with parts of a whole.",q:[
+[1,"Which is larger: 3/4 or 2/3?",["3/4","2/3","They are equal"],0,"Convert both to twelfths.","3/4 = 9/12 and 2/3 = 8/12, so 3/4 is larger. A common denominator lets you compare pieces of the same size."],
+[1,"A recipe uses 2 cups flour for 3 cups milk. What is the flour-to-milk ratio?",["3:2","2:3","2:5"],1,"Flour comes first in the question.","The order matters: flour to milk is 2:3. Flipping the order describes a different relationship."],
+[2,"The ratio of boys to girls is 3:5 and there are 40 students. How many girls?",["15","25","24"],1,"3 + 5 = 8 equal parts in total.","40 ÷ 8 = 5 students per part, so girls = 5 × 5 = 25. Ratios split a whole into equal parts."],
+[2,"What is 2/5 of 35?",["14","7","17.5"],0,"Find one fifth first.","One fifth of 35 is 7, so two fifths is 14. Divide by the denominator, then multiply by the numerator."],
+[3,"A map scale is 1:50,000. Two towns are 4 cm apart on the map. How far apart are they really?",["200 m","2 km","20 km"],1,"Multiply, then convert centimetres.","4 × 50,000 = 200,000 cm = 2,000 m = 2 km. A scale multiplies every length by the same factor."],
+[3,"Price rises 20%, then falls 20%. Compared with the start, the price is…",["The same","4% lower","4% higher"],1,"Use a starting price of 100.","100 → 120 → 96. The 20% drop applies to a bigger number, so you end below where you began."]]},
+sci:{n:"Photosynthesis and energy",d:"How plants turn light into the food that fuels life.",q:[
+[1,"Which gas do plants take in for photosynthesis?",["Oxygen","Carbon dioxide","Nitrogen"],1,"Think of what animals breathe out.","Plants take in carbon dioxide and release oxygen. Animals do the reverse, so the two cycles feed each other."],
+[1,"Where in a plant cell does photosynthesis happen?",["Nucleus","Mitochondria","Chloroplasts"],2,"Look for the green pigment.","Chloroplasts contain chlorophyll, which captures light energy."],
+[2,"A plant is kept in the dark for a week. What happens to its sugar production?",["It stops","It doubles","No change"],0,"What is the energy source?","Light drives the reaction, so without it the plant cannot make new sugar and uses its stored reserves."],
+[2,"Which equation summarises photosynthesis?",["Glucose + O₂ → CO₂ + H₂O","CO₂ + H₂O + light → glucose + O₂","Glucose → CO₂ + energy"],1,"The plant builds sugar.","Photosynthesis builds glucose from carbon dioxide and water using light. The first option is respiration, its reverse."],
+[3,"Why do leaves look green?",["They absorb green light","They reflect green light","They produce green light"],1,"Which colours does chlorophyll use?","Chlorophyll absorbs mostly red and blue light and reflects green, which is the colour we see."],
+[3,"On a very hot day plants close their pores. How does this affect photosynthesis?",["It slows it, since less CO₂ enters","It speeds it up","No effect"],0,"What do the pores let in?","Closed pores save water but block carbon dioxide, a raw material, so sugar production falls."]]},
+log:{n:"Logical reasoning",d:"Spot weak arguments and draw sound conclusions.",q:[
+[1,"All birds have feathers. A penguin is a bird. So a penguin…",["Has feathers","Can fly","Lives in snow"],0,"Only use the two given facts.","The conclusion follows directly from the premises. Flying and snow are not mentioned."],
+[1,"“Everyone I know likes this song, so it is the best song.” What is the flaw?",["Small, biased sample","Too many facts","No flaw"],0,"Who is in your circle?","Your friends are not a fair sample of everyone, and popularity does not prove quality."],
+[2,"Ice cream sales and drowning rise together in summer. What is the best explanation?",["Ice cream causes drowning","Warm weather drives both","Drowning causes ice cream sales"],1,"Look for a third factor.","Correlation is not causation. Hot weather increases swimming and ice cream eating, a hidden common cause."],
+[2,"If it rains, the street is wet. The street is wet. Did it rain?",["Yes, certainly","Not necessarily","No"],1,"What else wets streets?","This is affirming the consequent. A cleaning truck or a burst pipe also wets streets."],
+[3,"“This diet failed for my uncle, so diets do not work.” Which fallacy is this?",["Hasty generalisation","Circular reasoning","False dilemma"],0,"How many cases support the claim?","One case cannot support a claim about all diets. You need broad, representative evidence."],
+[3,"A study says a new tutoring method works. Which detail most increases your trust?",["A famous author wrote it","A control group was compared","It had many pages"],1,"Compared with what?","Without a control group you cannot tell whether the method or something else caused the gain."]]}};
+let mem={},S;
+const st={get:k=>{try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},set:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){mem[k]=v}}};
+function load(){try{S=JSON.parse(st.get("lumen"))}catch(e){}
+if(!S)S={m:{},sure:0,surewrong:0,done:0,right:0,j:[]};for(const k in T)S.m[k]=S.m[k]||0}
+const save=()=>st.set("lumen",JSON.stringify(S));
+const $=id=>document.getElementById(id);
+const lvl=m=>m<35?1:m<70?2:3;
+function view(v){["home","quiz","prog"].forEach(x=>$(x).hidden=x!==v);
+$("n1").setAttribute("aria-current",v!=="prog");$("n2").setAttribute("aria-current",v==="prog");
+if(v==="home")renderHome();if(v==="prog")renderProg();window.scrollTo(0,0)}
+$("n1").onclick=()=>view("home");$("n2").onclick=()=>view("prog");
+function renderHome(){$("topics").innerHTML=Object.keys(T).map(k=>`<button class="tp" data-k="${k}"><h3>${T[k].n}</h3><p>${T[k].d}</p><div class="bar" aria-hidden="true"><b style="width:${S.m[k]}%"></b></div><p style="margin:8px 0 0">Mastery ${S.m[k]}% · Level ${lvl(S.m[k])}</p></button>`).join("");
+document.querySelectorAll(".tp").forEach(b=>b.onclick=()=>start(b.dataset.k))}
+let R;
+function start(k){R={k,seen:[],queue:[],count:0,total:6,sel:null,hint:false,cur:null};next()}
+function pick(){const t=T[R.k].q;
+if(R.queue.length&&R.queue[0].due<=R.count){return R.queue.shift().i}
+const L=lvl(S.m[R.k]);const left=t.map((q,i)=>i).filter(i=>!R.seen.includes(i));
+if(!left.length)return R.queue.length?R.queue.shift().i:null;
+left.sort((a,b)=>Math.abs(t[a][0]-L)-Math.abs(t[b][0]-L));return left[0]}
+function next(){const i=pick();
+if(i===null||R.count>=R.total+R.queue.length&&!R.queue.length&&R.count>=R.total){return finish()}
+R.cur=i;if(!R.seen.includes(i))R.seen.push(i);R.sel=null;R.hint=false;drawQ()}
+function drawQ(){const q=T[R.k].q[R.cur];view("quiz");
+$("quiz").innerHTML=`<div class="card"><div class="meta"><span>${T[R.k].n}</span><span>Question ${R.count+1} of ${R.total} · Difficulty ${q[0]} of 3</span></div>
+<p class="q">${q[1]}</p><div id="os">${q[2].map((o,i)=>`<button class="opt" aria-pressed="false" data-i="${i}">${o}</button>`).join("")}</div>
+<div id="hz"></div>
+<p style="margin:18px 0 6px"><b>How sure are you?</b> Choose to lock in your answer.</p>
+<div class="row" style="margin-top:0"><button class="btn g conf" data-c="0" disabled>Guessing</button><button class="btn g conf" data-c="1" disabled>Think so</button><button class="btn g conf" data-c="2" disabled>Sure</button>
+<button class="btn g" id="hb">Show a hint</button><button class="btn g" id="qt">Exit</button></div></div>`;
+document.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{R.sel=+b.dataset.i;
+document.querySelectorAll(".opt").forEach(x=>x.setAttribute("aria-pressed",x===b));
+document.querySelectorAll(".conf").forEach(x=>x.disabled=false)});
+$("hb").onclick=()=>{R.hint=true;$("hz").innerHTML=`<div class="hint"><b>Hint:</b> ${q[4]}</div>`;$("hb").disabled=true};
+$("qt").onclick=()=>view("home");
+document.querySelectorAll(".conf").forEach(b=>b.onclick=()=>answer(+b.dataset.c))}
+function answer(c){const q=T[R.k].q[R.cur],ok=R.sel===q[3];
+const gain=ok?(R.hint?8:14)+q[0]*2:-10;
+S.m[R.k]=Math.max(0,Math.min(100,S.m[R.k]+gain));S.done++;if(ok)S.right++;
+if(c===2){S.sure++;if(!ok)S.surewrong++}
+R.count++;if(!ok)R.queue.push({i:R.cur,due:R.count+2});save();
+document.querySelectorAll(".opt").forEach((b,i)=>{b.disabled=true;if(i===q[3])b.classList.add("ok");else if(i===R.sel)b.classList.add("no")});
+document.querySelectorAll(".conf,#hb").forEach(b=>b.disabled=true);
+let tip=ok?(c===0?"You were right but unsure. Trust your reasoning more.":"Right, and well calibrated."):(c===2?"You were sure but wrong. These are the best chances to learn, so read the explanation closely.":"Not this time, and you sensed it. This question will come back soon.");
+const f=document.createElement("div");
+f.innerHTML=`<div class="fb ${ok?"":"no"}"><b>${ok?"Correct.":"Not quite."}</b> ${q[5]}<br><em style="color:var(--mut)">${tip}</em></div>
+<label for="rf"><b>Explain it in your own words</b></label><textarea id="rf" placeholder="Why is this the answer? What would you tell a friend?"></textarea>
+<div class="row"><button class="btn" id="nx">Next question</button></div>`;
+document.querySelector("#quiz .card").appendChild(f);
+$("nx").onclick=()=>{const t=$("rf").value.trim();if(t){S.j.unshift({t:q[1],r:t,d:new Date().toLocaleDateString()});S.j=S.j.slice(0,30);save()}next()}}
+function finish(){const m=S.m[R.k];view("quiz");
+$("quiz").innerHTML=`<div class="card"><h2>Session complete</h2><p class="lead" style="margin-top:12px">Your mastery of ${T[R.k].n.toLowerCase()} is now <b>${m}%</b> at level ${lvl(m)}. ${m>=70?"You are ready for the hardest questions. Try another topic or return later to keep it fresh.":"Another short session will move you up. Missed ideas return each time."}</p>
+<div class="row"><button class="btn" id="a">Practice again</button><button class="btn g" id="b">Choose another topic</button><button class="btn g" id="c">See my progress</button></div></div>`;
+$("a").onclick=()=>start(R.k);$("b").onclick=()=>view("home");$("c").onclick=()=>view("prog")}
+function renderProg(){const acc=S.done?Math.round(S.right/S.done*100):0;
+$("stats").innerHTML=`<div class="card" style="margin:0"><div class="big">${S.done}</div>questions answered</div><div class="card" style="margin:0"><div class="big">${acc}%</div>answered correctly</div><div class="card" style="margin:0"><div class="big">${S.sure?Math.round((S.sure-S.surewrong)/S.sure*100)+"%":"–"}</div>of “Sure” answers were right</div>`;
+$("mast").innerHTML=Object.keys(T).map(k=>`<p style="margin:14px 0 4px">${T[k].n}: ${S.m[k]}% (level ${lvl(S.m[k])})</p><div class="bar"><b style="width:${S.m[k]}%"></b></div>`).join("");
+$("jr").innerHTML=S.j.length?S.j.map(e=>`<div class="j"><small>${e.d} · ${e.t}</small><div>${e.r.replace(/</g,"&lt;")}</div></div>`).join(""):"<p style='color:var(--mut)'>Your written explanations will appear here after you answer questions.</p>"}
+$("reset").onclick=()=>{if(confirm("Delete all progress and journal entries?")){S=null;st.set("lumen","");load();save();renderProg()}};
+load();renderHome();
+</script></body></html>
